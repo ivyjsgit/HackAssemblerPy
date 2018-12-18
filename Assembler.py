@@ -1,6 +1,28 @@
 import os
 
-symbolTable = {}
+symbolTable = {"SCREEN": 16384,
+               "KBD": 24576,
+               "SP": 0,
+               "LCL": 1,
+               "ARG": 2,
+               "THIS": 3,
+               "THAT": 4,
+               "R0": 0,
+               "R1": 1,
+               "R2": 2,
+               "R3": 3,
+               "R4": 4,
+               "R5": 5,
+               "R6": 6,
+               "R7": 7,
+               "R8": 8,
+               "R9": 9,
+               "R10": 10,
+               "R11": 11,
+               "R12": 12,
+               "R13": 13,
+               "R14": 14,
+               "R15": 15}
 currentSymbol = 16
 curLine = 0
 
@@ -10,7 +32,7 @@ def openFile(filename):
     withoutComments = []
     for curline in lines:
         if not curline.startswith("//") and not isEmpty(curline):
-            withoutComments.append(curline)
+            withoutComments.append(curline.strip())
     return withoutComments
 
 
@@ -27,9 +49,7 @@ def decimalToBinary(n):
 def aCodeToHack(aop):
     aop = aop.split("@")[1]
     if not aop.isnumeric():
-        print("NOT NUMERIC " + aop)
         insertVarLabel(aop)
-        print(symbolTable)
         aop = int(symbolTable[aop])
     aop = int(aop)
     aop = decimalToBinary(aop)
@@ -40,10 +60,21 @@ def aCodeToHack(aop):
 
 def main():
     ourFile = openFile(
-        "/Users/ivy/Desktop/nand2tetris/projects/06/add/Add.asm")
+        "/Users/ivy/Desktop/LearningPython/Assembler/test.asm")
     # print(ourFile)
+    print(openFile)
+    generateSymbolTable(ourFile)
+    print(symbolTable)
     assembled = parseFile(ourFile)
+    writeFile("/Users/ivy/Desktop/LearningPython/Assembler/test.hack", assembled)
+    print(symbolTable)
     print(assembled)
+
+
+def writeFile(filename, list):
+    with open(filename, 'w') as f:
+        for item in list:
+            f.write("%s\n" % item)
 
 
 def commandToBinary(command):
@@ -154,12 +185,8 @@ def nonJumpToBinary(cmd):
 def jmpToBinary(cmd):
     destination = cmd.split(";")[0]
     jmp = cmd.split(";")[1]
-    print("Preprocessed jmp " + jmp)
     destination = commandToBinary(destination)
-    print("Destination is " + destination)
     jmp = jmpLocToBinary(jmp)
-    print("Jmp is " + jmp)
-
     return ("111" + destination + "000" + jmp)
 
 
@@ -167,6 +194,7 @@ def parseFile(file):
     global curLine
     output = []
     for line in file:
+        asBinary = ""
         if ";" in line:
             asBinary = jmpToBinary(line)
         elif "=" in line:
@@ -175,7 +203,9 @@ def parseFile(file):
             asBinary = aCodeToHack(line)
         else:
             asBinary = line
-        output.append(asBinary)
+            asBinary = ""
+        if not asBinary == "":
+            output.append(asBinary)
         curLine += 1
     return output
 
@@ -190,6 +220,24 @@ def insertVarLabel(str):
     if not str in symbolTable:
         symbolTable[str] = currentSymbol
         currentSymbol += 1
+
+
+def insertLabel(label):
+    global symbolTable
+    global curLine
+    if not label in symbolTable:
+        symbolTable[label] = curLine
+
+
+def generateSymbolTable(list):
+    global curLine
+    global symbolTable
+    for line in list:
+        if "(" in line:
+            line = subStringBetween(line, "(", ")")
+            insertLabel(line)
+            curLine -= 1
+        curLine += 1
 
 
 main()

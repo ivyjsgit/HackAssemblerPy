@@ -60,15 +60,11 @@ def aCodeToHack(aop):
 
 def main():
     ourFile = openFile(
-        "/Users/ivy/Desktop/LearningPython/Assembler/test.asm")
+        "/Users/ivy/Desktop/nand2tetris/projects/06/pong/PongL.asm")
     # print(ourFile)
-    print(openFile)
     generateSymbolTable(ourFile)
-    print(symbolTable)
     assembled = parseFile(ourFile)
     writeFile("/Users/ivy/Desktop/LearningPython/Assembler/test.hack", assembled)
-    print(symbolTable)
-    print(assembled)
 
 
 def writeFile(filename, list):
@@ -142,7 +138,7 @@ def destinationToBinary(dest):
     elif (dest == "D"):
         return "010"
     elif (dest == "MD"):
-        return "001"
+        return "011"
     elif (dest == "A"):
         return "100"
     elif (dest == "AM"):
